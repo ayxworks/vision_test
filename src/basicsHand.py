@@ -51,7 +51,6 @@ while True:
                     # print(id, lm)
                     #h, w, c = img1.shape
                     #cx, cy = int(lm.x * w), int(lm.y * h)
-                    print(imgRGB.shape)
                     h, w, c = imgRGB.shape
                     if len(imgRGB.shape)<3:
                         #dim = np.zeros((28,28))
@@ -68,7 +67,7 @@ while True:
         fps = 1 / (cTime - pTime)
         pTime = cTime
 
-        cv2.putText(img1, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3,
+        cv2.putText(imgRGB, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3,
                     (255, 0, 255), 3)
         
         ############################################################
