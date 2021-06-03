@@ -5,11 +5,12 @@ Youtube: http://www.youtube.com/c/MurtazasWorkshopRoboticsandAI
 Website: https://www.computervision.zone
 """
 
-import sys
 import cv2
 import mediapipe as mp
 import time
 from myLib import camera
+from pypylon import pylon
+import numpy as np
 
 class handDetector():
     def __init__(self, mode=False, maxHands=2, detectionCon=0.5, trackCon=0.5):
@@ -53,7 +54,7 @@ class handDetector():
 
 def main():
     cv2.namedWindow('live', cv2.WINDOW_NORMAL)
-    #cv2.resizeWindow('live', 480, 512)
+    cv2.resizeWindow('live', 2056, 1028)
     detector = handDetector()
     cameras = camera.camera()
     
@@ -61,24 +62,37 @@ def main():
     pTime = 0
     cTime = 0
 
-    while True:
-        
-        cameras.record()
+    paTime = 0
+    caTime = 0
+    #TODO: cameras.record() 
 
-        img = detector.findHands(cameras.images[0])
+    while True:
+        cameras.record()
+        img = detector.findHands(cameras.img1)
+        
+        """
         lmList = detector.findPosition(img)
 
         if len(lmList) != 0:
             print(lmList[4])
+        """
 
         cTime = time.time()
         fps = 1 / (cTime - pTime)
         pTime = cTime
 
         cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3,
-                    (255, 0, 255), 3)
+            (255, 0, 255), 3)
 
-        cv2.imshow("live", img)
+        img2 = detector.findHands(cameras.img2)
+        caTime = time.time()
+        fpsa = 1 / (caTime - paTime)
+        paTime = caTime
+
+        cv2.putText(img2, str(int(fpsa)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3,
+            (255, 0, 255), 3)
+
+        cv2.imshow("live", np.hstack([img,img2]))
         cv2.waitKey(1)
 
 
