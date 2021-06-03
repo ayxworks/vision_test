@@ -6,8 +6,8 @@ from pypylon import pylon
 class camera():
     def __init__(self, cameras=[], width=1280, height=512):
         self.cameras = cameras
-        self.grabRes = []
-        self.images = []
+        self.img1 = None
+        self.img2 = None
         self.width = width
         self.height = height
 
@@ -18,31 +18,33 @@ class camera():
         self.basler = pylon.InstantCameraArray(2)
         for i, self.cameras in enumerate(self.basler):
             self.cameras.Attach(tlFactory.CreateDevice(devices[i]))
-        print(self.cameras)
         self.basler.StartGrabbing(pylon.GrabStrategy_LatestImageOnly, 
-                pylon.GrabLoop_ProvidedByUser)
-
-        for i, basler in enumerate(self.basler):
-
-            self.grabRes.append(basler.RetrieveResult(5000, 
-                    pylon.TimeoutHandling_ThrowException))
-
-            if self.grabRes[i].GrabSucceeded():
-                img = self.grabRes[i].GetArray()
-                self.images.append(cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)) 
-            self.grabRes[i].Release()
-        self.basler.StopGrabbing()
+            pylon.GrabLoop_ProvidedByUser)
 
     def record(self):
-        self.basler.StartGrabbing(pylon.GrabStrategy_LatestImageOnly, 
-                pylon.GrabLoop_ProvidedByUser)
+        
         #while self.cameras.IsGrabbing():
-        for i, self.cameras in enumerate(self.basler):
-            self.grabRes[i] = self.basler.RetrieveResult(5000, 
-                                pylon.TimeoutHandling_ThrowException)
-            if self.grabRes[i].GrabSucceeded():
-                img1 = self.grabRes[i].GetArray()
-                self.images[i] = cv2.cvtColor(img1, cv2.COLOR_GRAY2RGB)
-            self.grabRes[i].Release()
+        grabResult1 = self.basler[0].RetrieveResult(5000, 
+                            pylon.TimeoutHandling_ThrowException)
+        
+        grabResult2 = self.basler[1].RetrieveResult(5000, 
+                            pylon.TimeoutHandling_ThrowException)
+        
+        if grabResult1.GrabSucceeded() & grabResult2.GrabSucceeded():
+            img1 = grabResult1.GetArray()
+            img2 = grabResult2.GetArray()
+            self.img1 = cv2.cvtColor(img1, cv2.COLOR_GRAY2RGB)
+            self.img2 = cv2.cvtColor(img2, cv2.COLOR_GRAY2RGB)
+        grabResult1.Release()
+        grabResult2.Release()
+
+    def stopGrab(self):
         self.basler.StopGrabbing()
+
+    def grabOne(self, cam=0):
+        self.basler[cam].Open()
+        self.basler[cam].MaxNumBuffer = 5
+        result = self.basler[cam].GrabOne(5000)
+        self.basler[cam].Close()
+        return result
             
