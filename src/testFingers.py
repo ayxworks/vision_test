@@ -53,8 +53,8 @@ class handDetector():
 
 
 def main():
-    cv2.namedWindow('live', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('live', 2056, 1028)
+    #cv2.namedWindow('live', cv2.WINDOW_NORMAL)
+    #cv2.resizeWindow('live', 2056, 1028)
     detector = handDetector()
     cameras = camera.camera()
     
@@ -64,35 +64,45 @@ def main():
 
     paTime = 0
     caTime = 0
-    #TODO: cameras.record() 
 
     while True:
         cameras.record()
         img = detector.findHands(cameras.img1)
-        
-        """
-        lmList = detector.findPosition(img)
-
-        if len(lmList) != 0:
-            print(lmList[4])
-        """
-
+         
         cTime = time.time()
         fps = 1 / (cTime - pTime)
         pTime = cTime
 
         cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3,
             (255, 0, 255), 3)
-
-        img2 = detector.findHands(cameras.img2)
+        #cv2.imshow("live", img)
+        ########################################################################################
         caTime = time.time()
         fpsa = 1 / (caTime - paTime)
         paTime = caTime
+        
+        imgThresh = cameras.skinMask(cameras.img2)
+        cv2.imshow("thresh", imgThresh)
 
-        cv2.putText(img2, str(int(fpsa)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3,
-            (255, 0, 255), 3)
+        contours = cameras.contours(cameras.img2, imgThresh)
+        hull = cv2.convexHull(contours)
+        cv2.drawContours(cameras.img2, [hull], -1, (0, 255, 255), 2)
 
-        cv2.imshow("live", np.hstack([img,img2]))
+        cv2.putText(hull, str(int(fpsa)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+        cv2.imshow("hull", cameras.img2)
+
+        
+
+        #hull = cv2.convexHull(contours, returnPoints=False)
+        #defects = cv2.convexityDefects(contours, hull)       
+        
+        ########################################################################################
+
+        k = cv2.waitKey(10)
+        if k == 27:
+            break
+
+        #cv2.imshow("live", np.hstack([img,img2]))
         cv2.waitKey(1)
 
 
