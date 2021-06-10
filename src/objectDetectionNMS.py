@@ -7,14 +7,14 @@ thres = 0.60 # Threshold to detect object
 nms_threshold = 0.1
 
 classNames= []
-classFile = os.getcwd() + "coco.names"
+classFile = os.getcwd() + "/src/data/coco.names"
 
 with open(classFile,"rt") as f:
-    classNames = f.read().rstrip("n").split("n")
+    classNames = f.read().rstrip("\n").split("\n")
 
 #print(classNames)
-configPath = os.getcwd() + "ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt"
-weightsPath = os.getcwd() + "frozen_inference_graph.pb"
+configPath = os.getcwd() + "/src/data/ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt"
+weightsPath = os.getcwd() + "/src/data/frozen_inference_graph.pb"
 
 net = cv2.dnn_DetectionModel(weightsPath,configPath)
 net.setInputSize(320,320)
@@ -32,7 +32,6 @@ while True:
     bbox = list(bbox)
     confs = list(np.array(confs).reshape(1,-1)[0])
     confs = list(map(float,confs))
-    #print(type(confs[0]))
     #print(confs)
 
     indices = cv2.dnn.NMSBoxes(bbox,confs,thres,nms_threshold)
@@ -57,11 +56,10 @@ while True:
     bbox = list(bbox)
     confs = list(np.array(confs).reshape(1,-1)[0])
     confs = list(map(float,confs))
-    #print(type(confs[0]))
+   
     #print(confs)
 
     indices = cv2.dnn.NMSBoxes(bbox,confs,thres,nms_threshold)
-    print(indices)
 
     for i in indices:
         i = i[0]
